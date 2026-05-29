@@ -7,7 +7,7 @@
   .avatar{width:72px;height:72px;border-radius:50%;background:#667eea;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#fff;margin-bottom:1rem}
   h1{font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;color:#fff;margin-bottom:0.3rem;text-align:center}
   .sub{color:rgba(255,255,255,0.5);font-size:0.9rem;margin-bottom:2rem;text-align:center}
-  .card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:1.5rem;width:100%;max-width:420px;backdrop-filter:blur(10px)}
+  .card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:1.5rem;width:100%;max-width:420px}
   .card label{display:block;font-size:12px;color:rgba(255,255,255,0.5);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
   textarea{width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:12px;color:#fff;font-family:'DM Sans',sans-serif;font-size:15px;padding:14px;resize:none;min-height:120px;outline:none;transition:border 0.2s}
   textarea:focus{border-color:rgba(102,126,234,0.8)}
@@ -54,7 +54,7 @@
 <div class="wrap">
   <div class="badge">anonymous message</div>
   <div class="avatar">Y</div>
-  <h1>Your Name</h1>
+  <h1>Ask Anything</h1>
   <p class="sub">send me an anonymous message</p>
 
   <div class="card" id="form-card">
@@ -63,7 +63,7 @@
     <div class="ig-row">
       <div class="ig-toggle" onclick="toggleIG()">
         <div class="toggle-box" id="tbox"><div class="toggle-knob"></div></div>
-        <span>reveal my instagram (optional)</span>
+        <span>reveal IG</span>
       </div>
     </div>
     <div id="ig-input-wrap">
@@ -88,7 +88,7 @@
 
   <div class="data-panel">
     <button class="dpanel-btn" onclick="togglePanel()">
-      <span>responses received (<span id="entry-count">0</span>)</span>
+      <span (<span id="entry-count">0</span>)</span>
       <span id="parrow">&#9662;</span>
     </button>
     <div class="entries-list" id="entries-list"></div>
@@ -98,46 +98,91 @@
 <script>
 let igOn=false;
 let entries=[];
-try{entries=JSON.parse(localStorage.getItem('ngl_v2')||'[]');}catch(e){}
+try{entries=JSON.parse(localStorage.getItem('ngl_v3')||'[]');}catch(e){}
+
+function getBrand(ua){
+  if(/SM-[A-Z]/i.test(ua)) return 'Samsung';
+  if(/Redmi|POCO|MI\s|M2\d{3}|22\d{3}|21\d{3}|20\d{3}/i.test(ua)) return 'Xiaomi/Redmi';
+  if(/OnePlus|EB2|IN2|LE2|KB2/i.test(ua)) return 'OnePlus';
+  if(/vivo/i.test(ua)) return 'Vivo';
+  if(/OPPO|CPH\d/i.test(ua)) return 'OPPO';
+  if(/realme|RMX/i.test(ua)) return 'Realme';
+  if(/Pixel/i.test(ua)) return 'Google Pixel';
+  if(/Nokia/i.test(ua)) return 'Nokia';
+  if(/Motorola|moto/i.test(ua)) return 'Motorola';
+  if(/LG-|LG\s/i.test(ua)) return 'LG';
+  if(/HTC/i.test(ua)) return 'HTC';
+  if(/Huawei|HUAWEI|Honor/i.test(ua)) return 'Huawei/Honor';
+  if(/Sony|Xperia/i.test(ua)) return 'Sony';
+  if(/Asus|ASUS|ZB\d|ZE\d|ZS\d/i.test(ua)) return 'Asus';
+  if(/Tecno/i.test(ua)) return 'Tecno';
+  if(/Infinix/i.test(ua)) return 'Infinix';
+  if(/itel/i.test(ua)) return 'itel';
+  return null;
+}
+
+function getModelName(ua){
+  const m=ua.match(/;\s*([^;)]+?)\s*(Build\/|MIUI|HarmonyOS|\))/);
+  if(!m) return null;
+  let raw=m[1].trim();
+  if(raw.length<=2) return null;
+  return raw;
+}
 
 function getDeviceInfo(){
   const ua=navigator.userAgent;
-  let device='Unknown',os='Unknown',browser='Unknown',type='Unknown';
+  let device='Unknown', os='Unknown', browser='Unknown', type='Unknown';
 
-  if(/iPhone/.test(ua)) device='iPhone';
-  else if(/iPad/.test(ua)) device='iPad';
-  else if(/Android/.test(ua)){
-    const m=ua.match(/Android [0-9.]+; ([^)]+)\)/);
-    device=m?m[1].split(' Build')[0]:'Android Device';
-  } else if(/Windows/.test(ua)) device='Windows PC';
-  else if(/Macintosh/.test(ua)) device='Mac';
-  else device='Unknown Device';
+  if(/iPhone/.test(ua)){
+    device='iPhone';
+  } else if(/iPad/.test(ua)){
+    device='iPad';
+  } else if(/Android/.test(ua)){
+    const brand=getBrand(ua);
+    const model=getModelName(ua);
+    if(brand && model) device=brand+' ('+model+')';
+    else if(brand) device=brand+' Android';
+    else if(model && model.length>2) device=model;
+    else device='Android Device';
+  } else if(/Windows/.test(ua)){
+    device='Windows PC';
+  } else if(/Macintosh/.test(ua)){
+    device='Mac';
+  } else if(/Linux/.test(ua)){
+    device='Linux PC';
+  }
 
-  if(/iPhone OS ([\d_]+)/.test(ua)) os='iOS '+RegExp.$1.replace(/_/g,'.');
+  if(/CPU iPhone OS ([\d_]+)/.test(ua)) os='iOS '+RegExp.$1.replace(/_/g,'.');
+  else if(/CPU OS ([\d_]+)/.test(ua)) os='iPadOS '+RegExp.$1.replace(/_/g,'.');
   else if(/Android ([\d.]+)/.test(ua)) os='Android '+RegExp.$1;
   else if(/Windows NT ([\d.]+)/.test(ua)){
-    const v={'10.0':'10','6.3':'8.1','6.2':'8','6.1':'7'};
+    const v={'10.0':'10/11','6.3':'8.1','6.2':'8','6.1':'7','6.0':'Vista','5.1':'XP'};
     os='Windows '+(v[RegExp.$1]||RegExp.$1);
   } else if(/Mac OS X ([\d_]+)/.test(ua)) os='macOS '+RegExp.$1.replace(/_/g,'.');
   else os='Unknown OS';
 
-  if(/CriOS/.test(ua)) browser='Chrome (iOS)';
+  if(/Instagram/.test(ua)) browser='Instagram App';
+  else if(/FBAN|FBAV/.test(ua)) browser='Facebook App';
+  else if(/CriOS/.test(ua)) browser='Chrome (iOS)';
   else if(/FxiOS/.test(ua)) browser='Firefox (iOS)';
   else if(/EdgA?\//.test(ua)) browser='Edge';
   else if(/OPR\/|Opera/.test(ua)) browser='Opera';
-  else if(/Chrome\//.test(ua)) browser='Chrome';
+  else if(/SamsungBrowser/.test(ua)) browser='Samsung Browser';
+  else if(/MiuiBrowser/.test(ua)) browser='MIUI Browser';
+  else if(/Chrome\//.test(ua)&&!/Chromium/.test(ua)) browser='Chrome';
   else if(/Firefox\//.test(ua)) browser='Firefox';
   else if(/Safari\//.test(ua)&&!/Chrome/.test(ua)) browser='Safari';
   else browser='Unknown Browser';
 
-  type=/Mobi|Android|iPhone|iPad/.test(ua)?'Mobile':'Desktop';
+  type=/Mobi|Android|iPhone|iPad/i.test(ua)?'Mobile':'Desktop';
 
   const lang=navigator.language||'Unknown';
-  const tz=Intl?Intl.DateTimeFormat().resolvedOptions().timeZone||'Unknown':'Unknown';
-  const screen=window.screen?window.screen.width+'x'+window.screen.height:'Unknown';
-  const ref=document.referrer||'Direct';
+  const tz=Intl&&Intl.DateTimeFormat?Intl.DateTimeFormat().resolvedOptions().timeZone||'Unknown':'Unknown';
+  const scr=window.screen?window.screen.width+'x'+window.screen.height:'Unknown';
+  const ref=document.referrer||'';
+  const referrer=ref.includes('instagram')?'Instagram':ref.includes('facebook')?'Facebook':ref?'Other ('+ref.split('/')[2]+')':'Direct';
 
-  return{device,os,browser,type,lang,tz,screen,referrer:ref.includes('instagram')?'Instagram':'Other ('+ref.split('/')[2]+')'};
+  return{device,os,browser,type,lang,tz,screen:scr,referrer};
 }
 
 function toggleIG(){
@@ -152,17 +197,10 @@ function sendMsg(){
   document.getElementById('msg').style.borderColor='';
   const ig=igOn?document.getElementById('ig-val').value.trim():null;
   const deviceInfo=getDeviceInfo();
-  const entry={
-    id:Date.now(),
-    message:msg,
-    instagram:ig||null,
-    device:deviceInfo,
-    time:new Date().toLocaleString()
-  };
+  const entry={id:Date.now(),message:msg,instagram:ig||null,device:deviceInfo,time:new Date().toLocaleString()};
   entries.unshift(entry);
-  try{localStorage.setItem('ngl_v2',JSON.stringify(entries));}catch(e){}
+  try{localStorage.setItem('ngl_v3',JSON.stringify(entries));}catch(e){}
 
-  
   
   fetch('https://formspree.io/f/meednnvl', {
     method:'POST',
@@ -217,7 +255,7 @@ function renderEntries(){
 }
 
 function clearAll(){
-  if(confirm('clear all?')){entries=[];localStorage.removeItem('ngl_v2');renderEntries();}
+  if(confirm('clear all?')){entries=[];localStorage.removeItem('ngl_v3');renderEntries();}
 }
 
 renderEntries();
