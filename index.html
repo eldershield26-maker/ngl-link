@@ -83,13 +83,7 @@
     <p>delivered anonymously</p>
     <button class="send-btn" style="max-width:180px;margin-top:1.2rem" onclick="resetForm()">send another</button>
   </div>
-  <div class="data-panel">
-    <button class="dpanel-btn" onclick="togglePanel()">
-      <span><span id="entry-count"></span></span>
-      <span id="parrow">&#9662;</span>
-    </button>
-    <div class="entries-list" id="entries-list"></div>
-  </div>
+  
 </div>
 
 <script>
@@ -198,39 +192,4 @@ function resetForm(){
   document.getElementById('success-screen').classList.remove('show');
 }
 
-function togglePanel(){
-  const l=document.getElementById('entries-list');
-  l.classList.toggle('open');
-  document.getElementById('parrow').innerHTML=l.classList.contains('open')?'&#9652;':'&#9662;';
-}
-
-function renderEntries(){
-  document.getElementById('entry-count').textContent=entries.length;
-  const l=document.getElementById('entries-list');
-  if(!entries.length){l.innerHTML='<div class="empty-state">no messages yet</div>';return;}
-  l.innerHTML=entries.map(e=>{
-    const d=e.device||{};
-    return`<div class="entry-item">
-      ${e.instagram?`<div class="ig-chip">@${e.instagram}</div>`:''}
-      <div class="entry-msg">${e.message.replace(/</g,'&lt;')}</div>
-      <div class="device-grid">
-        <div class="d-chip"><div class="d-chip-label">device</div><div class="d-chip-val">${d.device||'?'}</div></div>
-        <div class="d-chip"><div class="d-chip-label">os</div><div class="d-chip-val">${d.os||'?'}</div></div>
-        <div class="d-chip"><div class="d-chip-label">browser</div><div class="d-chip-val">${d.browser||'?'}</div></div>
-        <div class="d-chip"><div class="d-chip-label">type</div><div class="d-chip-val">${d.type||'?'}</div></div>
-        <div class="d-chip"><div class="d-chip-label">timezone</div><div class="d-chip-val">${d.tz||'?'}</div></div>
-        <div class="d-chip"><div class="d-chip-label">language</div><div class="d-chip-val">${d.lang||'?'}</div></div>
-        <div class="d-chip"><div class="d-chip-label">screen</div><div class="d-chip-val">${d.screen||'?'}</div></div>
-        <div class="d-chip"><div class="d-chip-label">came from</div><div class="d-chip-val">${d.referrer||'?'}</div></div>
-      </div>
-      <div class="time-str">${e.time}</div>
-    </div>`;
-  }).join('')+'<button class="clear-btn" onclick="clearAll()">clear all</button>';
-}
-
-function clearAll(){
-  if(confirm('clear all?')){entries=[];localStorage.removeItem('ngl_v4');renderEntries();}
-}
-
-renderEntries();
 </script>
