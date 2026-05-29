@@ -53,17 +53,16 @@
 
 <div class="wrap">
   <div class="badge">anonymous message</div>
-  <div class="avatar">Y</div>
+  <div class="avatar">U</div>
   <h1>Ask Anything</h1>
   <p class="sub">send me an anonymous message</p>
-
   <div class="card" id="form-card">
     <label>your message</label>
     <textarea id="msg" placeholder="tell me something honestly... i won't know who you are" maxlength="300"></textarea>
     <div class="ig-row">
       <div class="ig-toggle" onclick="toggleIG()">
         <div class="toggle-box" id="tbox"><div class="toggle-knob"></div></div>
-        <span>reveal IG</span>
+        <span>reveal my instagram (optional)</span>
       </div>
     </div>
     <div id="ig-input-wrap">
@@ -78,17 +77,15 @@
       completely anonymous · no account needed
     </div>
   </div>
-
   <div class="success" id="success-screen">
     <div class="check">&#10003;</div>
     <h2>message sent!</h2>
     <p>delivered anonymously</p>
     <button class="send-btn" style="max-width:180px;margin-top:1.2rem" onclick="resetForm()">send another</button>
   </div>
-
   <div class="data-panel">
     <button class="dpanel-btn" onclick="togglePanel()">
-      <span (<span id="entry-count">0</span>)</span>
+      <span><span id="entry-count"></span></span>
       <span id="parrow">&#9662;</span>
     </button>
     <div class="entries-list" id="entries-list"></div>
@@ -98,91 +95,69 @@
 <script>
 let igOn=false;
 let entries=[];
-try{entries=JSON.parse(localStorage.getItem('ngl_v3')||'[]');}catch(e){}
-
-function getBrand(ua){
-  if(/SM-[A-Z]/i.test(ua)) return 'Samsung';
-  if(/Redmi|POCO|MI\s|M2\d{3}|22\d{3}|21\d{3}|20\d{3}/i.test(ua)) return 'Xiaomi/Redmi';
-  if(/OnePlus|EB2|IN2|LE2|KB2/i.test(ua)) return 'OnePlus';
-  if(/vivo/i.test(ua)) return 'Vivo';
-  if(/OPPO|CPH\d/i.test(ua)) return 'OPPO';
-  if(/realme|RMX/i.test(ua)) return 'Realme';
-  if(/Pixel/i.test(ua)) return 'Google Pixel';
-  if(/Nokia/i.test(ua)) return 'Nokia';
-  if(/Motorola|moto/i.test(ua)) return 'Motorola';
-  if(/LG-|LG\s/i.test(ua)) return 'LG';
-  if(/HTC/i.test(ua)) return 'HTC';
-  if(/Huawei|HUAWEI|Honor/i.test(ua)) return 'Huawei/Honor';
-  if(/Sony|Xperia/i.test(ua)) return 'Sony';
-  if(/Asus|ASUS|ZB\d|ZE\d|ZS\d/i.test(ua)) return 'Asus';
-  if(/Tecno/i.test(ua)) return 'Tecno';
-  if(/Infinix/i.test(ua)) return 'Infinix';
-  if(/itel/i.test(ua)) return 'itel';
-  return null;
-}
-
-function getModelName(ua){
-  const m=ua.match(/;\s*([^;)]+?)\s*(Build\/|MIUI|HarmonyOS|\))/);
-  if(!m) return null;
-  let raw=m[1].trim();
-  if(raw.length<=2) return null;
-  return raw;
-}
+try{entries=JSON.parse(localStorage.getItem('ngl_v4')||'[]');}catch(e){}
 
 function getDeviceInfo(){
   const ua=navigator.userAgent;
-  let device='Unknown', os='Unknown', browser='Unknown', type='Unknown';
 
-  if(/iPhone/.test(ua)){
-    device='iPhone';
-  } else if(/iPad/.test(ua)){
-    device='iPad';
-  } else if(/Android/.test(ua)){
-    const brand=getBrand(ua);
-    const model=getModelName(ua);
-    if(brand && model) device=brand+' ('+model+')';
-    else if(brand) device=brand+' Android';
-    else if(model && model.length>2) device=model;
-    else device='Android Device';
-  } else if(/Windows/.test(ua)){
-    device='Windows PC';
-  } else if(/Macintosh/.test(ua)){
-    device='Mac';
-  } else if(/Linux/.test(ua)){
-    device='Linux PC';
-  }
+  let brand='Unknown Android';
+  if(/SamsungBrowser|SM-[A-Z0-9]/i.test(ua)) brand='Samsung';
+  else if(/; K\)/.test(ua)&&/SamsungBrowser/i.test(ua)) brand='Samsung';
+  else if(/Redmi|POCO/i.test(ua)) brand='Xiaomi / Redmi';
+  else if(/Mi\s|MIUI/i.test(ua)) brand='Xiaomi';
+  else if(/OnePlus|EB2|IN2|LE2|KB2/i.test(ua)) brand='OnePlus';
+  else if(/vivo/i.test(ua)) brand='Vivo';
+  else if(/OPPO|CPH\d/i.test(ua)) brand='OPPO';
+  else if(/realme|RMX/i.test(ua)) brand='Realme';
+  else if(/Pixel\s\d/i.test(ua)) brand='Google Pixel';
+  else if(/Nokia/i.test(ua)) brand='Nokia';
+  else if(/moto[- ]/i.test(ua)) brand='Motorola';
+  else if(/Huawei|HUAWEI/i.test(ua)) brand='Huawei';
+  else if(/Honor/i.test(ua)) brand='Honor';
+  else if(/Sony|Xperia/i.test(ua)) brand='Sony';
+  else if(/Tecno/i.test(ua)) brand='Tecno';
+  else if(/Infinix/i.test(ua)) brand='Infinix';
 
+  let device='Unknown';
+  if(/iPhone/.test(ua)) device='iPhone';
+  else if(/iPad/.test(ua)) device='iPad';
+  else if(/Android/.test(ua)){
+    const modelMatch=ua.match(/;\s*([A-Z]{2}-[A-Z0-9]+|Redmi[^;)]+|POCO[^;)]+|Pixel\s\d[^;)]*|CPH\d[^;)]+|RMX\d[^;)]+)/i);
+    if(modelMatch) device=brand+' ('+modelMatch[1].trim()+')';
+    else device=brand+' Phone';
+  } else if(/Windows/.test(ua)) device='Windows PC';
+  else if(/Macintosh/.test(ua)) device='Mac';
+  else if(/Linux/.test(ua)) device='Linux PC';
+
+  let os='Unknown';
   if(/CPU iPhone OS ([\d_]+)/.test(ua)) os='iOS '+RegExp.$1.replace(/_/g,'.');
   else if(/CPU OS ([\d_]+)/.test(ua)) os='iPadOS '+RegExp.$1.replace(/_/g,'.');
   else if(/Android ([\d.]+)/.test(ua)) os='Android '+RegExp.$1;
   else if(/Windows NT ([\d.]+)/.test(ua)){
-    const v={'10.0':'10/11','6.3':'8.1','6.2':'8','6.1':'7','6.0':'Vista','5.1':'XP'};
+    const v={'10.0':'10/11','6.3':'8.1','6.1':'7'};
     os='Windows '+(v[RegExp.$1]||RegExp.$1);
   } else if(/Mac OS X ([\d_]+)/.test(ua)) os='macOS '+RegExp.$1.replace(/_/g,'.');
-  else os='Unknown OS';
 
+  let browser='Unknown';
   if(/Instagram/.test(ua)) browser='Instagram App';
   else if(/FBAN|FBAV/.test(ua)) browser='Facebook App';
-  else if(/CriOS/.test(ua)) browser='Chrome (iOS)';
-  else if(/FxiOS/.test(ua)) browser='Firefox (iOS)';
-  else if(/EdgA?\//.test(ua)) browser='Edge';
-  else if(/OPR\/|Opera/.test(ua)) browser='Opera';
-  else if(/SamsungBrowser/.test(ua)) browser='Samsung Browser';
+  else if(/SamsungBrowser\/([\d.]+)/.test(ua)) browser='Samsung Browser '+RegExp.$1.split('.')[0];
   else if(/MiuiBrowser/.test(ua)) browser='MIUI Browser';
-  else if(/Chrome\//.test(ua)&&!/Chromium/.test(ua)) browser='Chrome';
-  else if(/Firefox\//.test(ua)) browser='Firefox';
+  else if(/CriOS/.test(ua)) browser='Chrome (iOS)';
+  else if(/EdgA?\//.test(ua)) browser='Edge';
+  else if(/OPR\//.test(ua)) browser='Opera';
+  else if(/Chrome\/([\d]+)/.test(ua)) browser='Chrome '+RegExp.$1;
+  else if(/Firefox\/([\d]+)/.test(ua)) browser='Firefox '+RegExp.$1;
   else if(/Safari\//.test(ua)&&!/Chrome/.test(ua)) browser='Safari';
-  else browser='Unknown Browser';
 
-  type=/Mobi|Android|iPhone|iPad/i.test(ua)?'Mobile':'Desktop';
-
+  const type=/Mobi|Android|iPhone|iPad/i.test(ua)?'Mobile':'Desktop';
   const lang=navigator.language||'Unknown';
   const tz=Intl&&Intl.DateTimeFormat?Intl.DateTimeFormat().resolvedOptions().timeZone||'Unknown':'Unknown';
   const scr=window.screen?window.screen.width+'x'+window.screen.height:'Unknown';
   const ref=document.referrer||'';
-  const referrer=ref.includes('instagram')?'Instagram':ref.includes('facebook')?'Facebook':ref?'Other ('+ref.split('/')[2]+')':'Direct';
+  const referrer=ref.includes('instagram')?'Instagram':ref.includes('facebook')?'Facebook':ref?ref.split('/')[2]||'Other':'Direct';
 
-  return{device,os,browser,type,lang,tz,screen:scr,referrer};
+  return{device,os,browser,type,lang,tz,screen:scr,referrer,rawUA:ua.substring(0,120)};
 }
 
 function toggleIG(){
@@ -199,15 +174,14 @@ function sendMsg(){
   const deviceInfo=getDeviceInfo();
   const entry={id:Date.now(),message:msg,instagram:ig||null,device:deviceInfo,time:new Date().toLocaleString()};
   entries.unshift(entry);
-  try{localStorage.setItem('ngl_v3',JSON.stringify(entries));}catch(e){}
+  try{localStorage.setItem('ngl_v4',JSON.stringify(entries));}catch(e){}
 
-  
-  fetch('https://formspree.io/f/meednnvl', {
+  fetch('https://formspree.io/f/meednnvl',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify(entry)
   });
-  
+ 
 
   document.getElementById('form-card').style.display='none';
   document.getElementById('success-screen').classList.add('show');
@@ -255,7 +229,7 @@ function renderEntries(){
 }
 
 function clearAll(){
-  if(confirm('clear all?')){entries=[];localStorage.removeItem('ngl_v3');renderEntries();}
+  if(confirm('clear all?')){entries=[];localStorage.removeItem('ngl_v4');renderEntries();}
 }
 
 renderEntries();
